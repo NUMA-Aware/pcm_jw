@@ -422,15 +422,19 @@ void display_bandwidth(PCM *m, memdata_t *md, const uint32 no_columns, const boo
 void display_bandwidth_csv(PCM *m, memdata_t *md, uint64 /*elapsedTime*/, const bool show_channel_output, const CsvOutputType outputType)
 {
     const uint32 numSockets = m->getNumSockets();
-    printDateForCSV(outputType);
+    //printDateForCSV(outputType);
 
     float sysReadDRAM = 0.0, sysWriteDRAM = 0.0, sysReadPMM = 0.0, sysWritePMM = 0.0;
+
+    //cout<<endl<<"numSocket : "<<numSockets<<endl; // 2 for optane server, 8 for manycore
+    //cout<<"max imc ch# : "<<max_imc_channels<<endl; // 6 for optane server, 8 for manycore
 
     for (uint32 skt = 0; skt < numSockets; ++skt)
     {
         auto printSKT = [skt](int c = 1) {
             for (int i = 0; i < c; ++i)
-                cout << "SKT" << skt << ',';
+                //cout << "SKT" << skt << ',';
+		;
         };
         if (show_channel_output)
         {
@@ -441,58 +445,59 @@ void display_bandwidth_csv(PCM *m, memdata_t *md, uint64 /*elapsedTime*/, const 
 
                 choose(outputType,
                        [printSKT]() {
-                           printSKT(2);
+                           //printSKT(2);
                        },
                        [&channel]() {
-                           cout << "Ch" << channel << "Read,"
-                                << "Ch" << channel << "Write,";
+                           /*cout << "Ch" << channel << "Read,"
+                                << "Ch" << channel << "Write,";*/
                        },
                        [&md, &skt, &channel]() {
-                           cout << setw(8) << md->iMC_Rd_socket_chan[skt][channel] << ','
-                                << setw(8) << md->iMC_Wr_socket_chan[skt][channel] << ',';
+                           /*cout << setw(8) << md->iMC_Rd_socket_chan[skt][channel] << ','
+                                << setw(8) << md->iMC_Wr_socket_chan[skt][channel] << ',';*/
                        });
 
                 if (md->PMM)
                 {
                     choose(outputType,
                            [printSKT]() {
-                               printSKT(2);
+                               //printSKT(2);
                            },
                            [&channel]() {
-                               cout << "Ch" << channel << "PMM_Read,"
-                                    << "Ch" << channel << "PMM_Write,";
+                               //cout << "Ch" << channel << "PMM_Read,"
+                               //     << "Ch" << channel << "PMM_Write,";
                            },
                            [&skt, &md, &channel]() {
-                               cout << setw(8) << md->iMC_PMM_Rd_socket_chan[skt][channel] << ','
-                                    << setw(8) << md->iMC_PMM_Wr_socket_chan[skt][channel] << ',';
+                               //cout << setw(8) << md->iMC_PMM_Rd_socket_chan[skt][channel] << ','
+                               //     << setw(8) << md->iMC_PMM_Wr_socket_chan[skt][channel] << ',';
                            });
                 }
             }
         }
+	//Mem R/W BW per NODE
         choose(outputType,
                [printSKT]() {
-                   printSKT(2);
+                   //printSKT(2);
                },
                []() {
-                   cout << "Mem Read (MB/s),Mem Write (MB/s),";
+                   //cout << "Mem R(MB/s),Mem W(MB/s),";
                },
                [&md, &skt]() {
-                   cout << setw(8) << md->iMC_Rd_socket[skt] << ','
-                        << setw(8) << md->iMC_Wr_socket[skt] << ',';
+                   /*cout << setw(8) << md->iMC_Rd_socket[skt] << ','
+                        << setw(8) << md->iMC_Wr_socket[skt] << ',';*/
                });
 
         if (md->PMM || md->PMMMixedMode)
         {
             choose(outputType,
                    [printSKT]() {
-                       printSKT(2);
+                       //printSKT(2);
                    },
                    []() {
-                       cout << "PMM_Read (MB/s), PMM_Write (MB/s),";
+                       //cout << "PMM_Read (MB/s), PMM_Write (MB/s),";
                    },
                    [&md, &skt]() {
-                       cout << setw(8) << md->iMC_PMM_Rd_socket[skt] << ','
-                            << setw(8) << md->iMC_PMM_Wr_socket[skt] << ',';
+                       //cout << setw(8) << md->iMC_PMM_Rd_socket[skt] << ','
+                       //     << setw(8) << md->iMC_PMM_Wr_socket[skt] << ',';
                    });
         }
         if (md->PMM)
@@ -501,13 +506,13 @@ void display_bandwidth_csv(PCM *m, memdata_t *md, uint64 /*elapsedTime*/, const 
             {
                 choose(outputType,
                     [printSKT]() {
-                        printSKT();
+                        //printSKT();
                     },
                     [c]() {
-                        cout << "iMC" << c << " NM read hit rate,";
+                        //cout << "iMC" << c << " NM read hit rate,";
                     },
                     [&md, &skt, c]() {
-                        cout << setw(8) << md->M2M_NM_read_hit_rate[skt][c] << ',';
+                        //cout << setw(8) << md->M2M_NM_read_hit_rate[skt][c] << ',';
                     });
             }
         }
@@ -535,23 +540,25 @@ void display_bandwidth_csv(PCM *m, memdata_t *md, uint64 /*elapsedTime*/, const 
                            printSKT();
                        },
                        []() {
-                           cout << "P. Write (T/s),";
+                           //cout << "P. Write (T/s),";
                        },
                        [&md, &skt]() {
-                           cout << setw(10) << dec << md->partial_write[skt] << ',';
+                           //cout << setw(10) << dec << md->partial_write[skt] << ',';
                        });
             }
         }
 
+	//total R+W BW per NODE
         choose(outputType,
                [printSKT]() {
                    printSKT();
                },
                []() {
-                   cout << "Memory (MB/s),";
+                   //cout << "Mem(MB/s),";
                },
                [&]() {
-                   cout << setw(8) << md->iMC_Rd_socket[skt] + md->iMC_Wr_socket[skt] << ',';
+                   //cout << setw(8) << md->iMC_Rd_socket[skt] << ','<<md->iMC_Wr_socket[skt] << ',';
+                   //cout << setw(8) << md->iMC_Rd_socket[skt] + md->iMC_Wr_socket[skt] << ',';
 
                    sysReadDRAM += md->iMC_Rd_socket[skt];
                    sysWriteDRAM += md->iMC_Wr_socket[skt];
@@ -605,30 +612,34 @@ void display_bandwidth_csv(PCM *m, memdata_t *md, uint64 /*elapsedTime*/, const 
     {
         choose(outputType,
                []() {
-                   cout << "System,System,System,System,";
+                   //cout << "System,System,System,System,";
                },
                []() {
-                   cout << "DRAMRead,DRAMWrite,PMMREAD,PMMWrite,";
+                   //cout << "DRAMRead,DRAMWrite,PMMREAD,PMMWrite,";
                },
                [&]() {
-                   cout << setw(10) << sysReadDRAM << ','
+                   /*cout << setw(10) << sysReadDRAM << ','
                         << setw(10) << sysWriteDRAM << ','
                         << setw(10) << sysReadPMM << ','
-                        << setw(10) << sysWritePMM << ',';
+                        << setw(10) << sysWritePMM << ',';*/
+			   		cout<<setw(10)<<sysReadPMM<<','
+						<<setw(10)<<sysWritePMM<<',';
                });
     }
 
+    //final BW (total read, total write, total memory BW)
     choose(outputType,
            []() {
-               cout << "System,System,System\n";
+               //cout << "System,System,System\n";
            },
            []() {
-               cout << "Read,Write,Memory\n";
+               //cout << "Read,Write,Memory\n";
            },
            [&]() {
-               cout << setw(10) << sysReadDRAM + sysReadPMM << ','
+               /*cout << setw(10) << sysReadDRAM + sysReadPMM << ','
                     << setw(10) << sysWriteDRAM + sysWritePMM << ','
-                    << setw(10) << sysReadDRAM + sysReadPMM + sysWriteDRAM + sysWritePMM << "\n";
+                    << setw(10) << sysReadDRAM + sysReadPMM + sysWriteDRAM + sysWritePMM << "\n";*/
+	   	cout<<endl;
            });
 }
 
@@ -769,6 +780,8 @@ void calculate_bandwidth(PCM *m, const ServerUncoreCounterState uncState1[], con
             display_bandwidth_csv(m, &md, elapsedTime, show_channel_output, Header2);
             csvheader = false;
         }
+
+		//goto here
         display_bandwidth_csv(m, &md, elapsedTime, show_channel_output, Data);
     }
     else
@@ -1087,9 +1100,14 @@ int main(int argc, char * argv[])
     if( sysCmd != NULL ) {
         MySystem(sysCmd, sysArgv);
     }
+	
+	//int tiktok = 0;
 
     mainLoop([&]()
     {
+		//jw time limit : 63s
+		//if(tiktok > 63)break;
+
         if(!csv) cout << flush;
 
         calibratedSleep(delay, sysCmd, mainLoop, m);

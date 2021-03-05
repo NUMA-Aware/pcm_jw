@@ -268,34 +268,48 @@ int main(int argc, char * argv[])
         AfterTime = m->getTickCount();
         m->getAllCounterStates(SysAfterState, DummySocketStates, AfterState);
 
-        cout << "Time elapsed: " << dec << fixed << AfterTime - BeforeTime << " ms\n";
+        //cout << "Time elapsed: " << dec << fixed << AfterTime - BeforeTime << " ms\n";
         //cout << "Called sleep function for " << dec << fixed << delay_ms << " ms\n";
 
-        if (csv)
+        /*if (csv)
             cout << "Core,IPC,Instructions,Cycles,Local DRAM accesses,Remote DRAM accesses \n";
         else
             cout << "Core | IPC  | Instructions | Cycles  |  Local DRAM accesses | Remote DRAM Accesses \n";
+	    */
 
+	uint64 la, ra;
+	
         for (uint32 i = 0; i < ncores; ++i)
         {
-            if (csv)
+            /*if (csv)
                 cout << i << ",";
             else
                 cout << " " << setw(3) << i << "   " << setw(2);
-
-            print_stats(BeforeState[i], AfterState[i], csv);
+		*/
+            //print_stats(BeforeState[i], AfterState[i], csv);
+	    if(i%28==0){
+	    	la = 0;
+		ra = 0;
+	    }
+	
+	    la += getNumberOfCustomEvents(0, BeforeState[i], AfterState[i]);
+	    ra += getNumberOfCustomEvents(1, BeforeState[i], AfterState[i]);
+	    
+	    if(i%28==27){
+	    	cout<<la<<"\t"<<ra<<"\t";
+	    }
         }
 
-
+	/*
         if (csv)
             cout << "*,";
         else
         {
             cout << "-------------------------------------------------------------------------------------------------------------------\n";
             cout << "   *   ";
-        }
+        }*/
 
-        print_stats(SysBeforeState, SysAfterState, csv);
+        //print_stats(SysBeforeState, SysAfterState, csv);
 
         cout << "\n";
 
